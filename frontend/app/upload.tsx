@@ -354,8 +354,57 @@ const styles = StyleSheet.create({
   },
   uploadContainer: {
     flex: 1,
-    minHeight: 250,
+    minHeight: 300,
     marginBottom: 24,
+  },
+  uploadOptionsContainer: {
+    backgroundColor: '#16213e',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+  },
+  uploadTitle: {
+    color: '#ffffff',
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  uploadDescription: {
+    color: '#8892b0',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 16,
+    width: '100%',
+  },
+  optionButton: {
+    flex: 1,
+    backgroundColor: '#1a1a2e',
+    borderRadius: 12,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: '#00d4aa',
+    borderStyle: 'solid',
+  },
+  optionButtonContent: {
+    alignItems: 'center',
+  },
+  optionButtonTitle: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  optionButtonSubtitle: {
+    color: '#8892b0',
+    fontSize: 12,
+    textAlign: 'center',
   },
   uploadButton: {
     backgroundColor: '#16213e',
