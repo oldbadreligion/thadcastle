@@ -197,23 +197,40 @@ CRITICAL: Provide actual price levels based on what you observe in the chart. If
         
         # Parse the response (assuming it's JSON format)
         import json
+        import re
         try:
+            # First try to parse as direct JSON
             analysis_data = json.loads(response)
         except json.JSONDecodeError:
-            # Fallback if response is not JSON
-            analysis_data = {
-                "patterns_detected": ["Analysis completed"],
-                "support_levels": ["See explanation"],
-                "resistance_levels": ["See explanation"],
-                "trend_analysis": "See detailed explanation",
-                "trading_plan": {
-                    "entry_price": "See explanation",
-                    "exit_price": "See explanation",
-                    "stop_loss": "See explanation",
-                    "risk_reward_ratio": "See explanation"
-                },
-                "explanation": response
-            }
+            try:
+                # Try to extract JSON from markdown code blocks
+                json_match = re.search(r'```json\s*(\{.*?\})\s*```', response, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group(1)
+                    analysis_data = json.loads(json_str)
+                else:
+                    # Try to find any JSON-like structure in the response
+                    json_match = re.search(r'(\{.*?\})', response, re.DOTALL)
+                    if json_match:
+                        json_str = json_match.group(1)
+                        analysis_data = json.loads(json_str)
+                    else:
+                        raise json.JSONDecodeError("No JSON found", response, 0)
+            except (json.JSONDecodeError, AttributeError):
+                # Fallback if response is not JSON
+                analysis_data = {
+                    "patterns_detected": ["Analysis completed"],
+                    "support_levels": ["See explanation"],
+                    "resistance_levels": ["See explanation"],
+                    "trend_analysis": "See detailed explanation",
+                    "trading_plan": {
+                        "entry_price": "See explanation",
+                        "exit_price": "See explanation",
+                        "stop_loss": "See explanation",
+                        "risk_reward_ratio": "See explanation"
+                    },
+                    "explanation": response
+                }
         
         # Create result object
         trading_plan = TradingPlan(
