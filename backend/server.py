@@ -1,15 +1,18 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import base64
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime
-
+from PIL import Image
+import io
+from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -25,8 +28,36 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Models
+class UserPreferences(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    experience_level: str  # "beginner", "intermediate", "advanced"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
-# Define Models
+class UserPreferencesCreate(BaseModel):
+    experience_level: str
+
+class ChartAnalysisRequest(BaseModel):
+    image_base64: str
+    experience_level: str
+
+class TradingPlan(BaseModel):
+    entry_price: Optional[str] = None
+    exit_price: Optional[str] = None
+    stop_loss: Optional[str] = None
+    risk_reward_ratio: Optional[str] = None
+
+class ChartAnalysisResult(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patterns_detected: List[str] = []
+    support_levels: List[str] = []
+    resistance_levels: List[str] = []
+    trend_analysis: str = ""
+    trading_plan: TradingPlan = Field(default_factory=TradingPlan)
+    explanation: str = ""
+    experience_level: str = ""
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
 class StatusCheck(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     client_name: str
@@ -35,16 +66,169 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
-# Add your routes to the router instead of directly to app
+# Helper function to get AI analysis
+async def analyze_chart_with_ai(image_base64: str, experience_level: str) -> ChartAnalysisResult:
+    try:
+        # Initialize LLM chat
+        api_key = os.getenv("EMERGENT_LLM_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="AI service not configured")
+        
+        session_id = str(uuid.uuid4())
+        
+        # Create system message based on experience level
+        if experience_level == "beginner":
+            system_message = """You are a helpful trading assistant that analyzes financial charts for beginners. 
+            Provide simple, easy-to-understand explanations. Focus on basic patterns and clear guidance.
+            Always include the disclaimer: 'This is not financial advice. This analysis is for educational purposes only.'"""
+        elif experience_level == "intermediate":
+            system_message = """You are a trading assistant that analyzes financial charts for intermediate traders.
+            Provide detailed technical analysis with moderate complexity. Include risk management principles.
+            Always include the disclaimer: 'This is not financial advice. This analysis is for educational purposes only.'"""
+        else:  # advanced
+            system_message = """You are a professional trading assistant that analyzes financial charts for advanced traders.
+            Provide comprehensive technical analysis with advanced concepts, ratios, and detailed risk management.
+            Always include the disclaimer: 'This is not financial advice. This analysis is for educational purposes only.'"""
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=session_id,
+            system_message=system_message
+        ).with_model("openai", "gpt-4o")
+        
+        # Create image content
+        image_content = ImageContent(image_base64=image_base64)
+        
+        # Analysis prompt
+        analysis_prompt = """Analyze this financial chart and provide:
+
+1. **Patterns Detected**: List any chart patterns you can identify (e.g., Head and Shoulders, Triangle, Flag, etc.)
+2. **Support Levels**: Identify key support price levels
+3. **Resistance Levels**: Identify key resistance price levels  
+4. **Trend Analysis**: Overall trend direction (bullish/bearish/sideways) with reasoning
+5. **Trading Plan**: Suggest entry price, exit price, stop-loss, and risk/reward ratio
+6. **Explanation**: Detailed explanation appropriate for the user's experience level
+
+Format your response as JSON with these exact keys:
+{
+  "patterns_detected": ["pattern1", "pattern2"],
+  "support_levels": ["level1", "level2"],
+  "resistance_levels": ["level1", "level2"],
+  "trend_analysis": "trend description",
+  "trading_plan": {
+    "entry_price": "price",
+    "exit_price": "price", 
+    "stop_loss": "price",
+    "risk_reward_ratio": "ratio"
+  },
+  "explanation": "detailed explanation with disclaimer"
+}"""
+        
+        # Send message with image
+        user_message = UserMessage(
+            text=analysis_prompt,
+            file_contents=[image_content]
+        )
+        
+        response = await chat.send_message(user_message)
+        
+        # Parse the response (assuming it's JSON format)
+        import json
+        try:
+            analysis_data = json.loads(response)
+        except json.JSONDecodeError:
+            # Fallback if response is not JSON
+            analysis_data = {
+                "patterns_detected": ["Analysis completed"],
+                "support_levels": ["See explanation"],
+                "resistance_levels": ["See explanation"],
+                "trend_analysis": "See detailed explanation",
+                "trading_plan": {
+                    "entry_price": "See explanation",
+                    "exit_price": "See explanation",
+                    "stop_loss": "See explanation",
+                    "risk_reward_ratio": "See explanation"
+                },
+                "explanation": response
+            }
+        
+        # Create result object
+        trading_plan = TradingPlan(
+            entry_price=analysis_data.get("trading_plan", {}).get("entry_price"),
+            exit_price=analysis_data.get("trading_plan", {}).get("exit_price"),
+            stop_loss=analysis_data.get("trading_plan", {}).get("stop_loss"),
+            risk_reward_ratio=analysis_data.get("trading_plan", {}).get("risk_reward_ratio")
+        )
+        
+        result = ChartAnalysisResult(
+            patterns_detected=analysis_data.get("patterns_detected", []),
+            support_levels=analysis_data.get("support_levels", []),
+            resistance_levels=analysis_data.get("resistance_levels", []),
+            trend_analysis=analysis_data.get("trend_analysis", ""),
+            trading_plan=trading_plan,
+            explanation=analysis_data.get("explanation", ""),
+            experience_level=experience_level
+        )
+        
+        return result
+        
+    except Exception as e:
+        logging.error(f"AI analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+# API Routes
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "ChartAI Trading Assistant API"}
 
+@api_router.post("/user-preferences", response_model=UserPreferences)
+async def save_user_preferences(preferences: UserPreferencesCreate):
+    """Save user experience level preferences"""
+    prefs_dict = preferences.dict()
+    prefs_obj = UserPreferences(**prefs_dict)
+    await db.user_preferences.insert_one(prefs_obj.dict())
+    return prefs_obj
+
+@api_router.get("/user-preferences")
+async def get_user_preferences():
+    """Get the latest user preferences"""
+    prefs = await db.user_preferences.find().sort("created_at", -1).limit(1).to_list(1)
+    if prefs:
+        return UserPreferences(**prefs[0])
+    return {"experience_level": "beginner"}
+
+@api_router.post("/analyze-chart", response_model=ChartAnalysisResult)
+async def analyze_chart(request: ChartAnalysisRequest):
+    """Analyze a financial chart image"""
+    try:
+        # Validate base64 image
+        if not request.image_base64:
+            raise HTTPException(status_code=400, detail="No image provided")
+        
+        # Perform AI analysis
+        result = await analyze_chart_with_ai(request.image_base64, request.experience_level)
+        
+        # Save to database
+        await db.chart_analyses.insert_one(result.dict())
+        
+        return result
+        
+    except Exception as e:
+        logging.error(f"Chart analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/analysis-history", response_model=List[ChartAnalysisResult])
+async def get_analysis_history():
+    """Get recent chart analysis history"""
+    analyses = await db.chart_analyses.find().sort("created_at", -1).limit(10).to_list(10)
+    return [ChartAnalysisResult(**analysis) for analysis in analyses]
+
+# Original status endpoints
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     status_dict = input.dict()
     status_obj = StatusCheck(**status_dict)
-    _ = await db.status_checks.insert_one(status_obj.dict())
+    await db.status_checks.insert_one(status_obj.dict())
     return status_obj
 
 @api_router.get("/status", response_model=List[StatusCheck])
