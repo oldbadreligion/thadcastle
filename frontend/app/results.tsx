@@ -310,11 +310,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   tradingPlanItem: {
-    width: '48%',
     backgroundColor: '#1a1a2e',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#00d4aa',
   },
   tradingPlanLabel: {
     fontSize: 12,
