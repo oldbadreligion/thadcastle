@@ -56,26 +56,7 @@ export default function UploadScreen() {
     }
   };
 
-  const showImagePicker = () => {
-    Alert.alert(
-      'Select Chart Image',
-      'Choose how you want to add your trading chart:',
-      [
-        {
-          text: 'Camera',
-          onPress: takePhoto,
-        },
-        {
-          text: 'Gallery',
-          onPress: pickImage,
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ]
-    );
-  };
+  // Removed showImagePicker function - now using direct button actions
 
   const takePhoto = async () => {
     try {
