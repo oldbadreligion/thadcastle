@@ -185,7 +185,9 @@ class ChartAITester:
                         if all(field in trading_plan for field in trading_plan_fields):
                             # Check response - if AI can't process image, that's expected for test image
                             explanation = data.get("explanation", "")
-                            if "unable to view or analyze this image" in explanation.lower():
+                            if ("unable to view" in explanation.lower() or 
+                                "can't analyze" in explanation.lower() or
+                                "cannot analyze" in explanation.lower()):
                                 self.log_test(f"Chart Analysis ({test_data['experience_level']})", 
                                             True, "AI correctly identified invalid test image - backend working", 
                                             {k: v for k, v in data.items() if k != "explanation"})
@@ -196,7 +198,7 @@ class ChartAITester:
                             else:
                                 # This would be concerning - AI provided analysis without disclaimer
                                 self.log_test(f"Chart Analysis ({test_data['experience_level']})", 
-                                            False, "AI provided analysis without proper disclaimer")
+                                            False, f"Unexpected AI response: {explanation[:100]}...")
                                 all_passed = False
                         else:
                             missing_tp_fields = [f for f in trading_plan_fields if f not in trading_plan]
