@@ -99,30 +99,93 @@ async def analyze_chart_with_ai(image_base64: str, experience_level: str) -> Cha
         # Create image content
         image_content = ImageContent(image_base64=image_base64)
         
-        # Analysis prompt
-        analysis_prompt = """Analyze this financial chart and provide:
+        # Create detailed analysis prompt based on experience level
+        base_prompt = """You are analyzing a financial trading chart. Please provide a comprehensive technical analysis with specific, actionable trading suggestions.
 
-1. **Patterns Detected**: List any chart patterns you can identify (e.g., Head and Shoulders, Triangle, Flag, etc.)
-2. **Support Levels**: Identify key support price levels
-3. **Resistance Levels**: Identify key resistance price levels  
-4. **Trend Analysis**: Overall trend direction (bullish/bearish/sideways) with reasoning
-5. **Trading Plan**: Suggest entry price, exit price, stop-loss, and risk/reward ratio
-6. **Explanation**: Detailed explanation appropriate for the user's experience level
+IMPORTANT: Always examine the chart carefully for:
+- Current price levels and recent price action
+- Key support and resistance zones
+- Volume patterns (if visible)
+- Trend direction and momentum
+- Chart patterns and formations
+- Entry and exit opportunities
 
-Format your response as JSON with these exact keys:
+Provide specific price levels based on what you can observe in the chart, not generic responses."""
+
+        if experience_level == "beginner":
+            analysis_prompt = f"""{base_prompt}
+
+For a BEGINNER trader, analyze this chart and provide:
+
+1. **Patterns Detected**: Identify simple, clear chart patterns (e.g., "Ascending Triangle", "Double Bottom", "Support/Resistance Break")
+2. **Support Levels**: List 2-3 key price levels where the chart has bounced up from (be specific: e.g., "$45.20", "$44.85")
+3. **Resistance Levels**: List 2-3 key price levels where price has been rejected (be specific with prices)
+4. **Trend Analysis**: Simple trend direction with easy-to-understand reasoning (bullish/bearish/sideways)
+5. **Trading Plan**: Provide specific actionable levels:
+   - Entry Price: Optimal entry point based on chart analysis
+   - Exit Price: First profit target based on technical levels
+   - Stop Loss: Risk management level to limit losses
+   - Risk/Reward Ratio: Calculate and explain (e.g., "1:2" means risk $1 to make $2)
+6. **Explanation**: Simple, educational explanation focusing on basic concepts
+
+Use simple language and explain WHY each level is important. Always end with: "This is not financial advice. This analysis is for educational purposes only."
+
+Format as JSON:"""
+        elif experience_level == "intermediate":
+            analysis_prompt = f"""{base_prompt}
+
+For an INTERMEDIATE trader, analyze this chart and provide:
+
+1. **Patterns Detected**: Identify chart patterns with confluence factors (e.g., "Bullish Flag with Volume Confirmation", "Head and Shoulders with RSI Divergence")
+2. **Support Levels**: Identify 3-4 key support zones with historical significance and volume analysis
+3. **Resistance Levels**: Identify 3-4 resistance levels including psychological levels and previous highs/lows
+4. **Trend Analysis**: Multi-timeframe trend analysis with momentum assessment and potential reversals
+5. **Trading Plan**: Detailed trading strategy:
+   - Entry Price: Optimal entry with confirmation signals required
+   - Exit Price: Multiple profit targets (PT1, PT2) based on Fibonacci or measured moves
+   - Stop Loss: Calculated based on technical levels and volatility
+   - Risk/Reward Ratio: Precise calculation with position sizing considerations
+6. **Explanation**: Technical analysis with moderate complexity, including multiple timeframe context
+
+Include confluence factors and explain the reasoning behind each level. Always end with: "This is not financial advice. This analysis is for educational purposes only."
+
+Format as JSON:"""
+        else:  # advanced
+            analysis_prompt = f"""{base_prompt}
+
+For an ADVANCED trader, analyze this chart and provide:
+
+1. **Patterns Detected**: Comprehensive pattern analysis including complex formations, Elliott Wave patterns, and institutional levels
+2. **Support Levels**: Dynamic and static support levels with volume profile analysis, order flow, and market structure
+3. **Resistance Levels**: Multi-layered resistance analysis including supply zones, liquidity levels, and algorithmic levels
+4. **Trend Analysis**: Advanced trend analysis with market structure, momentum divergences, sector rotation, and macro factors
+5. **Trading Plan**: Professional trading strategy:
+   - Entry Price: Precise entry with multiple confirmation signals and risk parameters
+   - Exit Price: Scaled exit strategy with multiple targets based on advanced technical analysis
+   - Stop Loss: Dynamic stop-loss strategy considering volatility, market conditions, and position management
+   - Risk/Reward Ratio: Advanced risk management with portfolio correlation and Kelly Criterion considerations
+6. **Explanation**: Comprehensive analysis suitable for professional traders, including market microstructure and advanced concepts
+
+Provide institutional-level analysis with specific price levels, volume analysis, and market structure. Always end with: "This is not financial advice. This analysis is for educational purposes only."
+
+Format as JSON:"""
+
+        analysis_prompt += """
 {
-  "patterns_detected": ["pattern1", "pattern2"],
-  "support_levels": ["level1", "level2"],
-  "resistance_levels": ["level1", "level2"],
-  "trend_analysis": "trend description",
+  "patterns_detected": ["specific pattern names with details"],
+  "support_levels": ["$XX.XX - reason for this level", "$XX.XX - reason for this level"],
+  "resistance_levels": ["$XX.XX - reason for this level", "$XX.XX - reason for this level"],
+  "trend_analysis": "comprehensive trend analysis with specific reasoning",
   "trading_plan": {
-    "entry_price": "price",
-    "exit_price": "price", 
-    "stop_loss": "price",
-    "risk_reward_ratio": "ratio"
+    "entry_price": "$XX.XX - specific entry reason and confirmation needed",
+    "exit_price": "$XX.XX - target based on technical analysis (or multiple targets PT1: $XX.XX, PT2: $XX.XX)",
+    "stop_loss": "$XX.XX - risk management level with specific reasoning",
+    "risk_reward_ratio": "1:X ratio with calculation explanation"
   },
-  "explanation": "detailed explanation with disclaimer"
-}"""
+  "explanation": "detailed technical analysis explanation with educational disclaimer"
+}
+
+CRITICAL: Provide actual price levels based on what you observe in the chart. If you cannot clearly see price levels, state that clearly but still provide analysis based on relative levels and patterns visible."""
         
         # Send message with image
         user_message = UserMessage(
