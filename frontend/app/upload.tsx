@@ -208,16 +208,40 @@ export default function UploadScreen() {
                 </TouchableOpacity>
               </View>
             ) : (
-              <TouchableOpacity 
-                style={styles.uploadButton}
-                onPress={showImagePicker}
-              >
-                <Ionicons name="cloud-upload-outline" size={48} color="#00d4aa" />
-                <Text style={styles.uploadText}>Upload Chart</Text>
-                <Text style={styles.uploadSubtext}>
-                  Take a photo or choose from gallery
+              <View style={styles.uploadOptionsContainer}>
+                <Text style={styles.uploadTitle}>Select Chart Source</Text>
+                <Text style={styles.uploadDescription}>
+                  Choose how you want to add your trading chart
                 </Text>
-              </TouchableOpacity>
+                
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity 
+                    style={styles.optionButton}
+                    onPress={takePhoto}
+                  >
+                    <View style={styles.optionButtonContent}>
+                      <Ionicons name="camera" size={32} color="#00d4aa" />
+                      <Text style={styles.optionButtonTitle}>Camera</Text>
+                      <Text style={styles.optionButtonSubtitle}>
+                        Take a photo of your chart
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={styles.optionButton}
+                    onPress={pickImage}
+                  >
+                    <View style={styles.optionButtonContent}>
+                      <Ionicons name="images" size={32} color="#00d4aa" />
+                      <Text style={styles.optionButtonTitle}>Gallery</Text>
+                      <Text style={styles.optionButtonSubtitle}>
+                        Choose from your photos
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
             )}
           </View>
 
