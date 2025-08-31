@@ -112,35 +112,35 @@ export default function ResultsScreen() {
       </View>
 
       <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        {/* Trading Plan Card */}
+        {/* Trading Plan Card - Enhanced */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="trending-up" size={20} color="#00d4aa" />
             <Text style={styles.cardTitle}>Trading Plan</Text>
           </View>
-          <View style={styles.tradingPlanGrid}>
+          <View style={styles.tradingPlanContainer}>
             <View style={styles.tradingPlanItem}>
-              <Text style={styles.tradingPlanLabel}>Entry Price</Text>
+              <Text style={styles.tradingPlanLabel}>📊 Entry Price</Text>
               <Text style={styles.tradingPlanValue}>
-                {analysisResult.trading_plan.entry_price || 'N/A'}
+                {analysisResult.trading_plan.entry_price || 'Analysis needed'}
               </Text>
             </View>
             <View style={styles.tradingPlanItem}>
-              <Text style={styles.tradingPlanLabel}>Exit Price</Text>
+              <Text style={styles.tradingPlanLabel}>🎯 Exit Price</Text>
               <Text style={styles.tradingPlanValue}>
-                {analysisResult.trading_plan.exit_price || 'N/A'}
+                {analysisResult.trading_plan.exit_price || 'Analysis needed'}
               </Text>
             </View>
             <View style={styles.tradingPlanItem}>
-              <Text style={styles.tradingPlanLabel}>Stop Loss</Text>
+              <Text style={styles.tradingPlanLabel}>🛡️ Stop Loss</Text>
               <Text style={styles.tradingPlanValue}>
-                {analysisResult.trading_plan.stop_loss || 'N/A'}
+                {analysisResult.trading_plan.stop_loss || 'Analysis needed'}
               </Text>
             </View>
             <View style={styles.tradingPlanItem}>
-              <Text style={styles.tradingPlanLabel}>Risk/Reward</Text>
+              <Text style={styles.tradingPlanLabel}>⚖️ Risk/Reward</Text>
               <Text style={styles.tradingPlanValue}>
-                {analysisResult.trading_plan.risk_reward_ratio || 'N/A'}
+                {analysisResult.trading_plan.risk_reward_ratio || 'Analysis needed'}
               </Text>
             </View>
           </View>
