@@ -140,6 +140,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "POST /api/analyze-chart endpoint working correctly. Emergent LLM integration functional with GPT-4 Vision. AI correctly handles invalid images by providing appropriate error messages. Response structure includes all required fields: patterns_detected, support_levels, resistance_levels, trend_analysis, trading_plan, explanation, experience_level, created_at"
+        - working: true
+          agent: "testing"
+          comment: "ENHANCED AI ANALYSIS VERIFIED: Fixed JSON parsing issue in backend that was causing generic responses. AI now provides specific trading suggestions with detailed entry/exit prices, stop loss levels, and risk/reward ratios. Experience-level differentiation working correctly - beginner gets simple guidance, intermediate gets specific prices ($1.00-$1.10 range), advanced gets comprehensive analysis with multiple targets. All responses include proper educational disclaimers. Professional trading terminology and comprehensive trend analysis confirmed working."
 
   - task: "Analysis History Retrieval"
     implemented: true
