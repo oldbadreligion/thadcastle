@@ -301,6 +301,9 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginLeft: 8,
   },
+  tradingPlanContainer: {
+    gap: 12,
+  },
   tradingPlanGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
