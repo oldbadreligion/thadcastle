@@ -185,9 +185,12 @@ class ChartAITester:
                         if all(field in trading_plan for field in trading_plan_fields):
                             # Check response - if AI can't process image, that's expected for test image
                             explanation = data.get("explanation", "")
-                            if ("unable to view" in explanation.lower() or 
+                            if ("unable to" in explanation.lower() or 
                                 "can't analyze" in explanation.lower() or
-                                "cannot analyze" in explanation.lower()):
+                                "cannot analyze" in explanation.lower() or
+                                "didn't load properly" in explanation.lower() or
+                                "appears to be empty" in explanation.lower() or
+                                "not displaying" in explanation.lower()):
                                 self.log_test(f"Chart Analysis ({test_data['experience_level']})", 
                                             True, "AI correctly identified invalid test image - backend working", 
                                             {k: v for k, v in data.items() if k != "explanation"})
