@@ -399,6 +399,10 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginLeft: 8,
   },
+  chartContainer: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
   tradingPlanContainer: {
     gap: 12,
   },

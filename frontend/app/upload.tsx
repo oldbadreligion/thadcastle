@@ -191,6 +191,17 @@ export default function UploadScreen() {
             </Text>
           </View>
 
+          {/* Instructions */}
+          <View style={styles.instructionsCard}>
+            <Text style={styles.instructionsTitle}>How to get the best analysis:</Text>
+            <Text style={styles.instructionsText}>
+              • Take clear photos of charts with visible price levels{'\n'}
+              • Ensure support/resistance lines are visible{'\n'}
+              • Include timeframe and ticker symbol if possible{'\n'}
+              • Avoid blurry or cropped images
+            </Text>
+          </View>
+
           {/* Upload Area */}
           <View style={styles.uploadContainer}>
             {selectedImage ? (
@@ -351,6 +362,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginLeft: 6,
+  },
+  instructionsCard: {
+    backgroundColor: '#16213e',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderLeftWidth: 4,
+    borderLeftColor: '#00d4aa',
+  },
+  instructionsTitle: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  instructionsText: {
+    color: '#8892b0',
+    fontSize: 14,
+    lineHeight: 20,
   },
   uploadContainer: {
     flex: 1,
