@@ -87,6 +87,10 @@ export default function OnboardingScreen() {
             </View>
             <Text style={styles.title}>Welcome to ChartAI</Text>
             <Text style={styles.subtitle}>Smart Trading Assistant</Text>
+            <Text style={styles.description}>
+              Upload your financial charts and get AI-powered analysis with pattern detection, 
+              support/resistance levels, and personalized trading insights.
+            </Text>
           </View>
 
           <View style={styles.contentContainer}>
@@ -258,6 +262,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#8892b0',
     textAlign: 'center',
+  },
+  description: {
+    fontSize: 14,
+    color: '#8892b0',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 20,
+    lineHeight: 20,
+    paddingHorizontal: 20,
   },
   contentContainer: {
     flex: 1,

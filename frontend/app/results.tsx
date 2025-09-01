@@ -8,10 +8,12 @@ import {
   ScrollView,
   StatusBar,
   Alert,
+  Dimensions,
 } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 
 interface TradingPlan {
   entry_price?: string;
@@ -144,6 +146,102 @@ export default function ResultsScreen() {
               </Text>
             </View>
           </View>
+        </View>
+
+        {/* Risk/Reward Visualization */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Ionicons name="pie-chart" size={20} color="#00d4aa" />
+            <Text style={styles.cardTitle}>Risk/Reward Analysis</Text>
+          </View>
+          {analysisResult.trading_plan.entry_price && analysisResult.trading_plan.exit_price && analysisResult.trading_plan.stop_loss ? (
+            <View style={styles.chartContainer}>
+              <PieChart
+                data={[
+                  {
+                    name: "Potential Profit",
+                    population: parseFloat(analysisResult.trading_plan.exit_price?.replace(/[^0-9.-]+/g,"") || "0") - parseFloat(analysisResult.trading_plan.entry_price?.replace(/[^0-9.-]+/g,"") || "0"),
+                    color: "#00d4aa",
+                    legendFontColor: "#8892b0",
+                    legendFontSize: 12,
+                  },
+                  {
+                    name: "Potential Loss",
+                    population: parseFloat(analysisResult.trading_plan.entry_price?.replace(/[^0-9.-]+/g,"") || "0") - parseFloat(analysisResult.trading_plan.stop_loss?.replace(/[^0-9.-]+/g,"") || "0"),
+                    color: "#ff6b6b",
+                    legendFontColor: "#8892b0",
+                    legendFontSize: 12,
+                  },
+                ]}
+                width={Dimensions.get("window").width - 60}
+                height={200}
+                chartConfig={{
+                  backgroundColor: "#16213e",
+                  backgroundGradientFrom: "#16213e",
+                  backgroundGradientTo: "#16213e",
+                  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(136, 146, 176, ${opacity})`,
+                }}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="15"
+                absolute
+              />
+            </View>
+          ) : (
+            <Text style={styles.noDataText}>Complete trading plan needed for visualization</Text>
+          )}
+        </View>
+
+        {/* Price Level Chart */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Ionicons name="stats-chart" size={20} color="#00d4aa" />
+            <Text style={styles.cardTitle}>Price Levels Visualization</Text>
+          </View>
+          {(analysisResult.support_levels.length > 0 || analysisResult.resistance_levels.length > 0) ? (
+            <View style={styles.chartContainer}>
+              <BarChart
+                data={{
+                  labels: ["Support", "Resistance"],
+                  datasets: [
+                    {
+                      data: [
+                        analysisResult.support_levels.length,
+                        analysisResult.resistance_levels.length,
+                      ],
+                    },
+                  ],
+                }}
+                width={Dimensions.get("window").width - 60}
+                height={220}
+                yAxisLabel=""
+                yAxisSuffix=" levels"
+                chartConfig={{
+                  backgroundColor: "#16213e",
+                  backgroundGradientFrom: "#16213e",
+                  backgroundGradientTo: "#1a1a2e",
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(0, 212, 170, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(136, 146, 176, ${opacity})`,
+                  style: {
+                    borderRadius: 16,
+                  },
+                  propsForDots: {
+                    r: "6",
+                    strokeWidth: "2",
+                    stroke: "#00d4aa",
+                  },
+                }}
+                style={{
+                  marginVertical: 8,
+                  borderRadius: 16,
+                }}
+              />
+            </View>
+          ) : (
+            <Text style={styles.noDataText}>No price levels available for visualization</Text>
+          )}
         </View>
 
         {/* Patterns Detected */}
@@ -300,6 +398,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#ffffff',
     marginLeft: 8,
+  },
+  chartContainer: {
+    alignItems: 'center',
+    marginTop: 16,
   },
   tradingPlanContainer: {
     gap: 12,

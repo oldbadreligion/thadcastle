@@ -1,15 +1,25 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "ChartAI",
+    "slug": "chartai-smart-trading",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
-    "userInterfaceStyle": "automatic",
+    "scheme": "chartai",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "description": "Smart Trading Assistant - AI-powered chart analysis for educational purposes",
+    "privacy": "public",
+    "platforms": ["ios", "android"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.chartai",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "ChartAI needs camera access to capture trading charts for analysis",
+        "NSPhotoLibraryUsageDescription": "ChartAI needs photo library access to select trading charts for analysis",
+        "CFBundleDisplayName": "ChartAI"
+      }
     },
     "android": {
       "adaptiveIcon": {

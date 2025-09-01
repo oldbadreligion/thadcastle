@@ -1,0 +1,38 @@
+{
+  "total": 5,
+  "passed": 4,
+  "failed": 1,
+  "success_rate": 80.0,
+  "results": [
+    {
+      "test": "Backend Health Check",
+      "status": "FAIL",
+      "message": "Backend returned status 404",
+      "duration": 0.314902
+    },
+    {
+      "test": "User Preferences API",
+      "status": "PASS",
+      "message": "User preferences created successfully",
+      "duration": 0.283347
+    },
+    {
+      "test": "Chart Analysis API",
+      "status": "PASS",
+      "message": "Chart analysis completed successfully",
+      "duration": 1.892513
+    },
+    {
+      "test": "Experience Level Differentiation",
+      "status": "PASS",
+      "message": "Different experience levels produce different outputs",
+      "duration": 4.541012
+    },
+    {
+      "test": "Financial Disclaimer Check",
+      "status": "PASS",
+      "message": "Financial disclaimer found in response",
+      "duration": 8.85023
+    }
+  ]
+}
